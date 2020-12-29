@@ -59,8 +59,10 @@ def post_photo():
     bot.upload_photo(f"./photos/{filename}", caption)
     bot.logout()
 
-schedule.every().day.at("13:00").do(post_photo)
+# schedule.every().day.at("13:00").do(post_photo)
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
+
+post_photo()
