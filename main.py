@@ -16,6 +16,15 @@ usr = os.getenv("USER")
 pwd = os.getenv("PASSWORD")
 api_key = os.getenv("API_KEY")
 
+def clean_photos_directory():
+    photos = "./photos"
+    files_in_photos = os.listdir(photos)
+    filtered_files = [file for file in files_in_photos if file.endswith(".REMOVE_ME")]
+
+    for file in filtered_files:
+	    path_to_file = os.path.join(photos, file)
+	    os.remove(path_to_file)
+
 def post_video(photo_data):
     video_url = dict(photo_data.json())['url']
     date = dict(photo_data.json())['date']
@@ -45,9 +54,10 @@ def post_video(photo_data):
         os.remove("./photos/video.mp4.REMOVE_ME")
 
 def post_photo():
-    # Delete config that throws errors if exists
+    # Delete config that throws errors if exists and clean photo dir
     if os.path.exists(f"./config/{usr}_uuid_and_cookie.json"):
         os.remove(f"./config/{usr}_uuid_and_cookie.json")
+    clean_photos_directory()
     
     # Get the data from NASA API
     url = f"https://api.nasa.gov/planetary/apod?api_key={api_key}"
