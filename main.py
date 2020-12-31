@@ -8,12 +8,41 @@ import requests
 import urllib.request
 from PIL import Image, ImageOps
 import os
+import pytube
 
 bot = Bot()
 
 usr = os.getenv("USER")
 pwd = os.getenv("PASSWORD")
 api_key = os.getenv("API_KEY")
+
+def post_video(photo_data):
+    video_url = dict(photo_data.json())['url']
+    date = dict(photo_data.json())['date']
+    description = dict(photo_data.json())['explanation']
+    title = dict(photo_data.json())['title']
+    
+    youtube = pytube.YouTube(video_url)
+    video = youtube.streams.get_highest_resolution()
+    print("downloading...")
+    video.download('./photos', filename = "video")
+    print("download complete")
+
+    caption = f"""
+        {date}
+        {title}
+        .
+        .
+        .
+        {description}
+    """
+
+    bot.login(username = usr, password = pwd)
+    bot.upload_video(f"./photos/video.mp4", caption)
+    bot.logout()
+
+    if os.path.exists("./photos/video.mp4.REMOVE_ME"):
+        os.remove("./photos/video.mp4.REMOVE_ME")
 
 def post_photo():
     # Delete config that throws errors if exists
@@ -25,9 +54,9 @@ def post_photo():
     photo_data = requests.get(url)
     print(photo_data.json())
 
-    # Skip upload if video
+    # Video upload
     if dict(photo_data.json())['media_type'] == 'video':
-        print('Cannot upload video, skipping...')
+        post_video(photo_data)
         return
 
     # Download photo from URL
@@ -58,11 +87,5 @@ def post_photo():
     bot.login(username = usr, password = pwd)
     bot.upload_photo(f"./photos/{filename}", caption)
     bot.logout()
-
-# schedule.every().day.at("13:00").do(post_photo)
-
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
 
 post_photo()
